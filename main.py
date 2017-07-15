@@ -4,17 +4,37 @@ SUPERCELL_SIZE = 3
 LINE_LENGTH = 9
 
 class Cell(object):
-
+    """
+    The cell object.
+    Does this need more explaining?
+    """
     def __init__(self, x, y, value=None):
         self.x = x
         self.y = y
+        self.relevant_cells = None
+        self._value = None
 
         if value == 0:
             self.value = None
-            self.possibilities = list(range(1, LINE_LENGTH + 1))
         else:
             self.value = value
+
+        self.possibilities = list(range(1, LINE_LENGTH + 1))
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        if self.value:
+            raise ValueError("Value is already set to {}. Attempted to set value {} to cell {},{}".format(self.value, value, self.x, self.y))
+
+        if value is not None:
             self.possibilities = list()
+
+        print("Found cell. Value {} to cell {},{}".format(value, self.x, self.y))
+        self._value = value
 
     def get_supercell(self):
         supercell_x = math.floor(self.x / SUPERCELL_SIZE)
@@ -24,8 +44,9 @@ class Cell(object):
     def __str__(self):
         return "X: {}, Y: {}, Val: {}, Possibilities: {}".format(self.x, self.y, self.value, self.possibilities)
 
-class Board(object):
 
+class Board(object):
+    """The board object. It does Sudoku things"""
     def __init__(self, cells=None):
         if cells:
             self.cells = cells
@@ -33,6 +54,9 @@ class Board(object):
             self.cells = list()
 
     def load_board(self, boardstring):
+        """Loads a board from a string.
+
+        Example board string: 200070038000006070300040600008020700100000006007030400004080009060400000910060002"""
         i = 0
 
         for char in boardstring:
@@ -55,100 +79,133 @@ class Board(object):
         return "".join(str_list)
 
     def print_board(self):
-        for cell in self.cells:
-            print(cell)
+        line = self.__str__()
+
+        for i in range(LINE_LENGTH):
+            print(line[i*LINE_LENGTH:(i+1)*LINE_LENGTH])
+
+        print()
 
     def get_supercell_members(self, supercell):
+        """Finds all cells in a supercell (the subgrids of the sudoku board)"""
         return [cell for cell in self.cells if cell.get_supercell() == supercell]
 
     def get_horizontal_members(self, y):
+        """Finds all cells in a horizontal line"""
         return [cell for cell in self.cells if cell.y == y]
 
     def get_vertical_members(self, x):
+        """Finds all cells in a vertical line"""
         return [cell for cell in self.cells if cell.x == x]
 
     def get_cell_values(self, cells):
+        """Returns a list with the values of the cells that were input"""
         return [cell.value for cell in cells]
 
+    def solve_last_in_sequence(self, sequence):
+        """
+        Attempts to find any cell that can only have that number.
+
+        :param sequence:
+        :return none:
+        """
+
+        # List of numbers
+        nums = list(range(1, LINE_LENGTH + 1))
+
+        # Remove numbers from numbers list if they are already in the sequence
+        for cell in sequence:
+            if cell.value in nums:
+                nums.remove(cell.value)
+
+        # Loops through the remaining numbers
+        for num in nums:
+
+            # Finds all cells with that possible number
+            num_cells = [cell for cell in sequence if num in cell.possibilities]
+
+            # If only one cell can have the number, set that cell to the number
+            if len(num_cells) == 1:
+                num_cells[0].value = num
+
+    def set_impacting_cells(self, cell):
+        """Finds all cells impacting the input cells and stores them in the cell"""
+        horizontal_cells = self.get_horizontal_members(cell.y)
+        vertical_cells = self.get_vertical_members(cell.x)
+        supercell_cells = self.get_supercell_members(cell.get_supercell())
+
+        cell.relevant_cells = horizontal_cells + vertical_cells + supercell_cells
+
+    def find_cell_possibilities(self):
+        """
+        Finds all possibilities for cells
+        :return:
+        """
+        for cell in self.cells:
+            if cell.value:
+                continue
+
+            cell.possibilities = [val for val in cell.possibilities if
+                                  val not in self.get_cell_values(cell.relevant_cells)]
+
+    def solve_last_possibility(self):
+        """Finds all cells that have only a single possible value left"""
+        for candidate_cell in self.cells:
+            # Skip cells with values
+            if candidate_cell.value:
+                continue
+
+            # If the cell has only one possibility left, set it to the last remaining value
+            if len(candidate_cell.possibilities) == 1:
+                candidate_cell.value = candidate_cell.possibilities[0]
+
     def solve_board(self):
-        change = False
-
         while True:
-            for cell in self.cells:
-                if cell.value:
-                    continue
+            # Store the previous version of the board
+            prev_board = self.return_boardstring()
 
-                prev_possibilities = len(cell.possibilities.copy())
+            self.find_cell_possibilities()
+            self.solve_last_possibility()
+            self.find_cell_possibilities()
 
-                horizontal_cells = self.get_horizontal_members(cell.y)
-                horizontal_values = self.get_cell_values(horizontal_cells)
+            for x in range(0, 3):
+                for y in range(0, 3):
+                    self.solve_last_in_sequence(self.get_supercell_members((x, y)))
 
-                vertical_cells = self.get_vertical_members(cell.x)
-                vertical_values = self.get_cell_values(vertical_cells)
+            self.find_cell_possibilities()
 
-                supercell_cells = self.get_supercell_members(cell.get_supercell())
-                supercell_values = self.get_cell_values(supercell_cells)
+            for i in range(LINE_LENGTH):
+                self.solve_last_in_sequence(self.get_vertical_members(i))
+                self.solve_last_in_sequence(self.get_horizontal_members(i))
 
-                cell.possibilities = [val for val in cell.possibilities if val not in horizontal_values]
-                cell.possibilities = [val for val in cell.possibilities if val not in vertical_values]
-                cell.possibilities = [val for val in cell.possibilities if val not in supercell_values]
+            self.find_cell_possibilities()
 
-                for i in cell.possibilities:
-                    for l_cell in horizontal_cells:
-                        if l_cell == cell:
-                            continue
-                        else:
-                            if i in l_cell.possibilities:
-                                break
+            self.print_board()
 
-                        cell.value = i
-
-                for i in cell.possibilities:
-                    for l_cell in vertical_cells:
-                        if l_cell == cell:
-                            continue
-                        else:
-                            if i in l_cell.possibilities:
-                                break
-
-                        cell.value = i
-
-                for i in cell.possibilities:
-                    for l_cell in supercell_cells:
-                        if l_cell == cell:
-                            continue
-                        else:
-                            if i in l_cell.possibilities:
-                                break
-
-                        cell.value = i
-
-                if len(cell.possibilities) == 1:
-                    cell.value = cell.possibilities[0]
-
-                if prev_possibilities != len(cell.possibilities):
-                    change = True
-
-            print(self)
-            if not change:
+            if self.return_boardstring() == prev_board:
                 break
 
     def return_boardstring(self):
+        boardstring = list()
         for cell in self.cells:
             if not cell.value:
-                val = 0
+                boardstring.append(0)
             else:
-                val = cell.value
+                boardstring.append(cell.value)
 
-            print(val, end='')
-        print()
+        return boardstring
 
 if __name__ == "__main__":
     board = Board()
 
     print("Input boardstring:")
     board.load_board(str(input()))
+    board.print_board()
+
+    # Set impact list
+    for cell in board.cells:
+        board.set_impacting_cells(cell)
 
     board.solve_board()
 
-    print(board)
+    board.print_board()
