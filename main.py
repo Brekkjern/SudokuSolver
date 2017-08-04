@@ -7,6 +7,11 @@ class Cell(object):
     """
     The cell object.
     Does this need more explaining?
+
+    The X and Y are the respective coordinates.
+    relevant_cells is a list of all cells that impact the current cell.
+    value is the current value of the cell, or None if there is no value set.
+    possibilities is a list of current possible numbers for the cell
     """
     def __init__(self, x, y, value=None):
         self.x = x
@@ -33,10 +38,11 @@ class Cell(object):
         if value is not None:
             self.possibilities = list()
 
-        print("Found cell. Value {} to cell {},{}".format(value, self.x, self.y))
+        print("Changed cell. Value {} to cell {},{}".format(value, self.x, self.y))
         self._value = value
 
     def get_supercell(self):
+        """Gets the coordinate of the parent supercell"""
         supercell_x = math.floor(self.x / SUPERCELL_SIZE)
         supercell_y = math.floor(self.y / SUPERCELL_SIZE)
         return supercell_x, supercell_y
@@ -69,6 +75,7 @@ class Board(object):
             i += 1
 
     def __str__(self):
+        """Returns a boardstring for the current board."""
         str_list = []
         for cell in self.cells:
             if cell.value:
@@ -79,12 +86,17 @@ class Board(object):
         return "".join(str_list)
 
     def print_board(self):
+        """Prints the board in a 9x9 grid."""
         line = self.__str__()
+        print_line = ""
 
+        # Split the line into
         for i in range(LINE_LENGTH):
-            print(line[i*LINE_LENGTH:(i+1)*LINE_LENGTH])
 
-        print()
+            print_line += line[i*LINE_LENGTH:(i+1)*LINE_LENGTH] + "\n"
+
+        # Print an extra line to separate previous prints
+        print(print_line + "\n")
 
     def get_supercell_members(self, supercell):
         """Finds all cells in a supercell (the subgrids of the sudoku board)"""
@@ -129,7 +141,7 @@ class Board(object):
                 num_cells[0].value = num
 
     def set_impacting_cells(self, cell):
-        """Finds all cells impacting the input cells and stores them in the cell"""
+        """Finds all cells impacting the input cells and stores them in the cells list"""
         horizontal_cells = self.get_horizontal_members(cell.y)
         vertical_cells = self.get_vertical_members(cell.x)
         supercell_cells = self.get_supercell_members(cell.get_supercell())
@@ -137,10 +149,7 @@ class Board(object):
         cell.relevant_cells = horizontal_cells + vertical_cells + supercell_cells
 
     def find_cell_possibilities(self):
-        """
-        Finds all possibilities for cells
-        :return:
-        """
+        """Finds all possible values for cells"""
         for cell in self.cells:
             if cell.value:
                 continue
@@ -162,7 +171,7 @@ class Board(object):
     def solve_board(self):
         while True:
             # Store the previous version of the board
-            prev_board = self.return_boardstring()
+            prev_board = self.__str__()
 
             self.find_cell_possibilities()
             self.solve_last_possibility()
@@ -182,18 +191,8 @@ class Board(object):
 
             self.print_board()
 
-            if self.return_boardstring() == prev_board:
+            if self.__str__() == prev_board:
                 break
-
-    def return_boardstring(self):
-        boardstring = list()
-        for cell in self.cells:
-            if not cell.value:
-                boardstring.append(0)
-            else:
-                boardstring.append(cell.value)
-
-        return boardstring
 
 if __name__ == "__main__":
     board = Board()
