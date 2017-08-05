@@ -32,6 +32,7 @@ class Cell(object):
 
     @value.setter
     def value(self, value):
+        """Makes sure that you can't set the value of the cell twice"""
         if self.value:
             raise ValueError("Value is already set to {}. Attempted to set value {} to cell {},{}".format(self.value, value, self.x, self.y))
 
@@ -43,6 +44,7 @@ class Cell(object):
 
     def get_supercell(self):
         """Gets the coordinate of the parent supercell"""
+
         supercell_x = math.floor(self.x / SUPERCELL_SIZE)
         supercell_y = math.floor(self.y / SUPERCELL_SIZE)
         return supercell_x, supercell_y
@@ -53,6 +55,7 @@ class Cell(object):
 
 class Board(object):
     """The board object. It does Sudoku things"""
+
     def __init__(self, cells=None):
         if cells:
             self.cells = cells
@@ -63,6 +66,7 @@ class Board(object):
         """Loads a board from a string.
 
         Example board string: 200070038000006070300040600008020700100000006007030400004080009060400000910060002"""
+
         i = 0
 
         for char in boardstring:
@@ -76,6 +80,7 @@ class Board(object):
 
     def __str__(self):
         """Returns a boardstring for the current board."""
+
         str_list = []
         for cell in self.cells:
             if cell.value:
@@ -87,6 +92,7 @@ class Board(object):
 
     def print_board(self):
         """Prints the board in a 9x9 grid."""
+
         line = self.__str__()
         print_line = ""
 
@@ -100,18 +106,22 @@ class Board(object):
 
     def get_supercell_members(self, supercell):
         """Finds all cells in a supercell (the subgrids of the sudoku board)"""
+
         return [cell for cell in self.cells if cell.get_supercell() == supercell]
 
     def get_horizontal_members(self, y):
         """Finds all cells in a horizontal line"""
+
         return [cell for cell in self.cells if cell.y == y]
 
     def get_vertical_members(self, x):
         """Finds all cells in a vertical line"""
+
         return [cell for cell in self.cells if cell.x == x]
 
     def get_cell_values(self, cells):
         """Returns a list with the values of the cells that were input"""
+
         return [cell.value for cell in cells]
 
     def solve_last_in_sequence(self, sequence):
@@ -142,6 +152,7 @@ class Board(object):
 
     def set_impacting_cells(self, cell):
         """Finds all cells impacting the input cells and stores them in the cells list"""
+
         horizontal_cells = self.get_horizontal_members(cell.y)
         vertical_cells = self.get_vertical_members(cell.x)
         supercell_cells = self.get_supercell_members(cell.get_supercell())
@@ -150,6 +161,7 @@ class Board(object):
 
     def find_cell_possibilities(self):
         """Finds all possible values for cells"""
+
         for cell in self.cells:
             if cell.value:
                 continue
@@ -159,6 +171,7 @@ class Board(object):
 
     def solve_last_possibility(self):
         """Finds all cells that have only a single possible value left"""
+
         for candidate_cell in self.cells:
             # Skip cells with values
             if candidate_cell.value:
@@ -169,6 +182,8 @@ class Board(object):
                 candidate_cell.value = candidate_cell.possibilities[0]
 
     def solve_board(self):
+        """Container method to solve the board"""
+
         while True:
             # Store the previous version of the board
             prev_board = self.__str__()
