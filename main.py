@@ -108,7 +108,7 @@ class Board(object):
         # Print an extra line to separate previous prints
         print(print_line + "\n")
 
-    def get_line_members(self, **kwargs):
+    def get_cells_where(self, **kwargs):
         """"Returns a list of the cells matching each of the provided properties"""
         return_list = []
 
@@ -151,9 +151,9 @@ class Board(object):
     def set_impacting_cells(self, cell):
         """Finds all cells impacting the input cells and stores them in the cells list"""
 
-        vertical_cells = self.get_line_members(x=cell.x)
-        horizontal_cells = self.get_line_members(y=cell.y)
-        supercell_cells = self.get_line_members(supercell = cell.supercell)
+        vertical_cells = self.get_cells_where(x=cell.x)
+        horizontal_cells = self.get_cells_where(y=cell.y)
+        supercell_cells = self.get_cells_where(supercell = cell.supercell)
 
         cell.relevant_cells = horizontal_cells + vertical_cells + supercell_cells
 
@@ -192,13 +192,13 @@ class Board(object):
 
             for x in range(0, 3):
                 for y in range(0, 3):
-                    self.solve_last_in_sequence(self.get_line_members(supercell=(x, y)))
+                    self.solve_last_in_sequence(self.get_cells_where(supercell=(x, y)))
 
             self.find_cell_possibilities()
 
             for i in range(LINE_LENGTH):
-                self.solve_last_in_sequence(self.get_line_members(x=i))
-                self.solve_last_in_sequence(self.get_line_members(y=i))
+                self.solve_last_in_sequence(self.get_cells_where(x=i))
+                self.solve_last_in_sequence(self.get_cells_where(y=i))
 
             self.find_cell_possibilities()
 
