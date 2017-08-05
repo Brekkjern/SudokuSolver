@@ -48,12 +48,13 @@ class Cell(object):
         print("Changed cell. Value {} to cell {},{}".format(value, self.x, self.y))
         self._value = value
 
-    def get_supercell(self):
+    @property
+    def supercell(self):
         """Gets the coordinate of the parent supercell"""
 
         supercell_x = math.floor(self.x / SUPERCELL_SIZE)
         supercell_y = math.floor(self.y / SUPERCELL_SIZE)
-        return supercell_x, supercell_y
+        return (supercell_x, supercell_y)
 
 
 class Board(object):
@@ -107,11 +108,6 @@ class Board(object):
         # Print an extra line to separate previous prints
         print(print_line + "\n")
 
-    def get_supercell_members(self, supercell):
-        """Finds all cells in a supercell (the subgrids of the sudoku board)"""
-
-        return [cell for cell in self.cells if cell.get_supercell() == supercell]
-
     def get_line_members(self, **kwargs):
         """"Returns a list of the cells matching each of the provided properties"""
         return_list = []
@@ -157,7 +153,7 @@ class Board(object):
 
         vertical_cells = self.get_line_members(x=cell.x)
         horizontal_cells = self.get_line_members(y=cell.y)
-        supercell_cells = self.get_supercell_members(cell.get_supercell())
+        supercell_cells = self.get_line_members(supercell = cell.supercell)
 
         cell.relevant_cells = horizontal_cells + vertical_cells + supercell_cells
 
@@ -196,7 +192,7 @@ class Board(object):
 
             for x in range(0, 3):
                 for y in range(0, 3):
-                    self.solve_last_in_sequence(self.get_supercell_members((x, y)))
+                    self.solve_last_in_sequence(self.get_line_members(supercell=(x, y)))
 
             self.find_cell_possibilities()
 
