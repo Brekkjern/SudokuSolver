@@ -26,6 +26,12 @@ class Cell(object):
 
         self.possibilities = list(range(1, LINE_LENGTH + 1))
 
+    def __str__(self):
+        return "X: {}, Y: {}, Val: {}, Possibilities: {}".format(self.x, self.y, self.value, self.possibilities)
+
+    def __repr__(self):
+        return "Cell({x}, {y}, {value})".format(x=self.x, y=self.y, value=self.value)
+
     @property
     def value(self):
         return self._value
@@ -49,9 +55,6 @@ class Cell(object):
         supercell_y = math.floor(self.y / SUPERCELL_SIZE)
         return supercell_x, supercell_y
 
-    def __str__(self):
-        return "X: {}, Y: {}, Val: {}, Possibilities: {}".format(self.x, self.y, self.value, self.possibilities)
-
 
 class Board(object):
     """The board object. It does Sudoku things"""
@@ -61,22 +64,6 @@ class Board(object):
             self.cells = cells
         else:
             self.cells = list()
-
-    def load_board(self, boardstring):
-        """Loads a board from a string.
-
-        Example board string: 200070038000006070300040600008020700100000006007030400004080009060400000910060002"""
-
-        i = 0
-
-        for char in boardstring:
-            char = int(char)
-            x = i % LINE_LENGTH
-            y = math.floor(i / LINE_LENGTH)
-
-            self.cells.append(Cell(x, y, char))
-
-            i += 1
 
     def __str__(self):
         """Returns a boardstring for the current board."""
@@ -89,6 +76,22 @@ class Board(object):
                 str_list.append(str(0))
 
         return "".join(str_list)
+
+    def load_board(self, boardstring):
+        """Loads a board from a string.
+
+        Example board string: 200070038000006070300040600008020700100000006007030400004080009060400000910060002
+        """
+        i = 0
+
+        for char in boardstring:
+            char = int(char)
+            x = i % LINE_LENGTH
+            y = math.floor(i / LINE_LENGTH)
+
+            self.cells.append(Cell(x, y, char))
+
+            i += 1
 
     def print_board(self):
         """Prints the board in a 9x9 grid."""
