@@ -112,15 +112,14 @@ class Board(object):
 
         return [cell for cell in self.cells if cell.get_supercell() == supercell]
 
-    def get_horizontal_members(self, y):
-        """Finds all cells in a horizontal line"""
+    def get_line_members(self, **kwargs):
+        """"Returns a list of the cells matching each of the provided properties"""
+        return_list = []
 
-        return [cell for cell in self.cells if cell.y == y]
+        for arg in kwargs:
+            return_list += list([cell for cell in self.cells if getattr(cell, str(arg), None) == kwargs[arg]])
 
-    def get_vertical_members(self, x):
-        """Finds all cells in a vertical line"""
-
-        return [cell for cell in self.cells if cell.x == x]
+        return return_list
 
     def get_cell_values(self, cells):
         """Returns a list with the values of the cells that were input"""
@@ -156,8 +155,8 @@ class Board(object):
     def set_impacting_cells(self, cell):
         """Finds all cells impacting the input cells and stores them in the cells list"""
 
-        horizontal_cells = self.get_horizontal_members(cell.y)
-        vertical_cells = self.get_vertical_members(cell.x)
+        vertical_cells = self.get_line_members(x=cell.x)
+        horizontal_cells = self.get_line_members(y=cell.y)
         supercell_cells = self.get_supercell_members(cell.get_supercell())
 
         cell.relevant_cells = horizontal_cells + vertical_cells + supercell_cells
@@ -202,8 +201,8 @@ class Board(object):
             self.find_cell_possibilities()
 
             for i in range(LINE_LENGTH):
-                self.solve_last_in_sequence(self.get_vertical_members(i))
-                self.solve_last_in_sequence(self.get_horizontal_members(i))
+                self.solve_last_in_sequence(self.get_line_members(x=i))
+                self.solve_last_in_sequence(self.get_line_members(y=i))
 
             self.find_cell_possibilities()
 
