@@ -122,6 +122,15 @@ class Board(object):
 
         return [cell.value for cell in cells]
 
+    def set_impacting_cells(self, cell):
+        """Finds all cells impacting the input cells and stores them in the cells list"""
+
+        vertical_cells = self.get_cells_where(x=cell.x)
+        horizontal_cells = self.get_cells_where(y=cell.y)
+        supercell_cells = self.get_cells_where(supercell=cell.supercell)
+
+        cell.relevant_cells = horizontal_cells + vertical_cells + supercell_cells
+
     def solve_last_in_sequence(self, sequence):
         """
         Attempts to find any cell that can only have that number.
@@ -147,15 +156,6 @@ class Board(object):
             # If only one cell can have the number, set that cell to the number
             if len(num_cells) == 1:
                 num_cells[0].value = num
-
-    def set_impacting_cells(self, cell):
-        """Finds all cells impacting the input cells and stores them in the cells list"""
-
-        vertical_cells = self.get_cells_where(x=cell.x)
-        horizontal_cells = self.get_cells_where(y=cell.y)
-        supercell_cells = self.get_cells_where(supercell = cell.supercell)
-
-        cell.relevant_cells = horizontal_cells + vertical_cells + supercell_cells
 
     def find_cell_possibilities(self):
         """Finds all possible values for cells"""
