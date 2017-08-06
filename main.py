@@ -3,6 +3,20 @@ import math
 SUPERCELL_SIZE = 3
 LINE_LENGTH = 9
 
+
+def possibility_decorator(func):
+    """Decorates solve methods for the Board class
+
+    Ensures that find_cell_possibilities is always run before running the methods.
+    This is to make sure that the cell possibilities are updated before the method is run.
+    """
+
+    def function_wrapper(self, *args, **kwargs):
+        self.find_cell_possibilities()
+        func(self, *args, **kwargs)
+    return function_wrapper
+
+
 class Cell(object):
     """
     The cell object.
@@ -141,6 +155,7 @@ class Board(object):
             cell.possibilities = [val for val in cell.possibilities if
                                   val not in self.get_cell_values(cell.relevant_cells)]
 
+    @possibility_decorator
     def solve_last_in_sequence(self, sequence):
         """
         Attempts to find any cell that can only have that number.
@@ -167,6 +182,7 @@ class Board(object):
             if len(num_cells) == 1:
                 num_cells[0].value = num
 
+    @possibility_decorator
     def solve_last_possibility(self):
         """Finds all cells that have only a single possible value left"""
 
@@ -186,21 +202,15 @@ class Board(object):
             # Store the previous version of the board
             prev_board = self.__str__()
 
-            self.find_cell_possibilities()
             self.solve_last_possibility()
-            self.find_cell_possibilities()
 
             for x in range(0, 3):
                 for y in range(0, 3):
                     self.solve_last_in_sequence(self.get_cells_where(supercell=(x, y)))
 
-            self.find_cell_possibilities()
-
             for i in range(LINE_LENGTH):
                 self.solve_last_in_sequence(self.get_cells_where(x=i))
                 self.solve_last_in_sequence(self.get_cells_where(y=i))
-
-            self.find_cell_possibilities()
 
             self.print_board()
 
@@ -212,6 +222,7 @@ if __name__ == "__main__":
 
     print("Input boardstring:")
     board.load_board(str(input()))
+
     board.print_board()
 
     # Set impact list
