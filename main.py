@@ -131,6 +131,16 @@ class Board(object):
 
         cell.relevant_cells = horizontal_cells + vertical_cells + supercell_cells
 
+    def find_cell_possibilities(self):
+        """Finds all possible values for cells"""
+
+        for cell in self.cells:
+            if cell.value:
+                continue
+
+            cell.possibilities = [val for val in cell.possibilities if
+                                  val not in self.get_cell_values(cell.relevant_cells)]
+
     def solve_last_in_sequence(self, sequence):
         """
         Attempts to find any cell that can only have that number.
@@ -156,16 +166,6 @@ class Board(object):
             # If only one cell can have the number, set that cell to the number
             if len(num_cells) == 1:
                 num_cells[0].value = num
-
-    def find_cell_possibilities(self):
-        """Finds all possible values for cells"""
-
-        for cell in self.cells:
-            if cell.value:
-                continue
-
-            cell.possibilities = [val for val in cell.possibilities if
-                                  val not in self.get_cell_values(cell.relevant_cells)]
 
     def solve_last_possibility(self):
         """Finds all cells that have only a single possible value left"""
