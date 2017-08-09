@@ -63,7 +63,7 @@ class Cell(object):
 
         possibilities = list(range(1, LINE_LENGTH + 1))
 
-        return [cell for cell in possibilities not in non_possibilities]
+        return [val for val in possibilities if val not in non_possibilities]
 
 
 class Board(object):
