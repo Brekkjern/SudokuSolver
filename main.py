@@ -4,19 +4,6 @@ SUPERCELL_SIZE = 3
 LINE_LENGTH = 9
 
 
-def possibility_decorator(func):
-    """Decorates solve methods for the Board class
-
-    Ensures that find_cell_possibilities is always run before running the methods.
-    This is to make sure that the cell possibilities are updated before the method is run.
-    """
-
-    def function_wrapper(self, *args, **kwargs):
-        self.find_cell_possibilities()
-        func(self, *args, **kwargs)
-    return function_wrapper
-
-
 class Cell(object):
     """
     The cell object.
@@ -30,15 +17,13 @@ class Cell(object):
     def __init__(self, x, y, value=None):
         self.x = x
         self.y = y
-        self.relevant_cells = None
+        self.neighbours = None
         self._value = None
 
         if value == 0:
             self.value = None
         else:
             self.value = value
-
-        self.possibilities = list(range(1, LINE_LENGTH + 1))
 
     def __str__(self):
         return "X: {}, Y: {}, Val: {}, Possibilities: {}".format(self.x, self.y, self.value, self.possibilities)
@@ -56,9 +41,6 @@ class Cell(object):
         if self.value:
             raise ValueError("Value is already set to {}. Attempted to set value {} to cell {},{}".format(self.value, value, self.x, self.y))
 
-        if value is not None:
-            self.possibilities = list()
-
         print("Changed cell. Value {} to cell {},{}".format(value, self.x, self.y))
         self._value = value
 
@@ -69,6 +51,19 @@ class Cell(object):
         supercell_x = math.floor(self.x / SUPERCELL_SIZE)
         supercell_y = math.floor(self.y / SUPERCELL_SIZE)
         return (supercell_x, supercell_y)
+
+    @property
+    def possibilities(self) -> list:
+        """The current possible values for the cell"""
+        non_possibilities = list()
+
+        for cell in self.neighbours:
+            if cell.value:
+                non_possibilities.append(cell.value)
+
+        possibilities = list(range(1, LINE_LENGTH + 1))
+
+        return [cell for cell in possibilities not in non_possibilities]
 
 
 class Board(object):
@@ -143,19 +138,11 @@ class Board(object):
         horizontal_cells = self.get_cells_where(y=cell.y)
         supercell_cells = self.get_cells_where(supercell=cell.supercell)
 
-        cell.relevant_cells = horizontal_cells + vertical_cells + supercell_cells
+        cell.neighbours = horizontal_cells + vertical_cells + supercell_cells
 
-    def find_cell_possibilities(self):
-        """Finds all possible values for cells"""
+        while cell in cell.neighbours:
+            cell.neighbours.remove(cell)
 
-        for cell in self.cells:
-            if cell.value:
-                continue
-
-            cell.possibilities = [val for val in cell.possibilities if
-                                  val not in self.get_cell_values(cell.relevant_cells)]
-
-    @possibility_decorator
     def solve_last_in_sequence(self, sequence):
         """
         Attempts to find any cell that can only have that number.
@@ -182,7 +169,6 @@ class Board(object):
             if len(num_cells) == 1:
                 num_cells[0].value = num
 
-    @possibility_decorator
     def solve_last_possibility(self):
         """Finds all cells that have only a single possible value left"""
 
