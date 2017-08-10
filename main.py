@@ -87,6 +87,9 @@ class Board(object):
 
         return "".join(str_list)
 
+    def __iter__(self):
+        return self.cells
+
     def load_board(self, boardstring):
         """Loads a board from a string.
 
