@@ -126,12 +126,7 @@ class Board(object):
 
         return return_list
 
-    def get_cell_values(self, cells):
-        """Returns a list with the values of the cells that were input"""
-
-        return [cell.value for cell in cells]
-
-    def set_impacting_cells(self, cell):
+    def set_neighbouring_cells(self, cell):
         """Finds all cells impacting the input cells and stores them in the cells list"""
 
         vertical_cells = self.get_cells_where(x=cell.x)
@@ -213,7 +208,7 @@ if __name__ == "__main__":
 
     # Set impact list
     for cell in board.cells:
-        board.set_impacting_cells(cell)
+        board.set_neighbouring_cells(cell)
 
     board.solve_board()
 
