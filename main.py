@@ -1,4 +1,5 @@
 import math
+from typing import Union
 
 SUPERCELL_SIZE = 3
 LINE_LENGTH = 9
@@ -7,10 +8,9 @@ LINE_LENGTH = 9
 class Cell(object):
     """
     The cell object.
-    Does this need more explaining?
 
-    The X and Y are the respective coordinates.
-    relevant_cells is a list of all cells that impact the current cell.
+    The x and y are the respective coordinates.
+    neighbours is a list of all cells that impact the current cell.
     value is the current value of the cell, or None if there is no value set.
     possibilities is a list of current possible numbers for the cell
     """
@@ -21,9 +21,9 @@ class Cell(object):
         self._value = None
 
         if value == 0:
-            self.value = None
+            self._value = None
         else:
-            self.value = value
+            self._value = value
 
     def __str__(self):
         return "X: {}, Y: {}, Val: {}, Possibilities: {}".format(self.x, self.y, self.value, self.possibilities)
@@ -42,6 +42,7 @@ class Cell(object):
             raise ValueError("Value is already set to {}. Attempted to set value {} to cell {},{}".format(self.value, value, self.x, self.y))
 
         print("Changed cell. Value {} to cell {},{}".format(value, self.x, self.y))
+
         self._value = value
 
     @property
@@ -65,6 +66,41 @@ class Cell(object):
 
         return [val for val in possibilities if val not in non_possibilities]
 
+    def solve(self) -> Union[bool, None]:
+        if self.value:
+            return None
+
+        ret_value = self.solve_last_possibility()
+        ret_value = ret_value if ret_value else self.solve_last_option()
+
+        return ret_value
+
+
+    def solve_last_possibility(self) -> bool:
+        """Checks if there is only one possibility left for the cell"""
+
+        if len(self.possibilities) == 1:
+            self.value = self.possibilities[0]
+            print("solve_last_possibility")
+            return True
+
+        return False
+
+    def solve_last_option(self) -> bool:
+        """Checks if any of the neighbouring cells have any of the remaining possibilities"""
+
+        possibilities = self.possibilities.copy()
+
+        for cell in self.neighbours:
+            possibilities = [val for val in possibilities if val not in cell.possibilities]
+
+        if len(possibilities) == 1:
+            self.value = possibilities[0]
+            print("solve_last_option")
+            return True
+
+        return False
+
 
 class Board(object):
     """The board object. It does Sudoku things"""
@@ -76,7 +112,7 @@ class Board(object):
             self.cells = list()
 
     def __str__(self):
-        """Returns a boardstring for the current board."""
+        """Returns a string representing the current board"""
 
         str_list = []
         for cell in self.cells:
@@ -93,7 +129,9 @@ class Board(object):
     def load_board(self, boardstring):
         """Loads a board from a string.
 
-        Example board string: 200070038000006070300040600008020700100000006007030400004080009060400000910060002
+        Example board strings:
+        200070038000006070300040600008020700100000006007030400004080009060400000910060002
+        002980500400070013039604070200056400840300201907001086600705130091400005020030608
         """
         i = 0
 
@@ -105,6 +143,8 @@ class Board(object):
             self.cells.append(Cell(x, y, char))
 
             i += 1
+
+        print("Loaded board:")
 
     def print_board(self):
         """Prints the board in a 9x9 grid."""
@@ -141,44 +181,6 @@ class Board(object):
         while cell in cell.neighbours:
             cell.neighbours.remove(cell)
 
-    def solve_last_in_sequence(self, sequence):
-        """
-        Attempts to find any cell that can only have that number.
-
-        :param sequence:
-        :return none:
-        """
-
-        # List of numbers
-        nums = list(range(1, LINE_LENGTH + 1))
-
-        # Remove numbers from numbers list if they are already in the sequence
-        for cell in sequence:
-            if cell.value in nums:
-                nums.remove(cell.value)
-
-        # Loops through the remaining numbers
-        for num in nums:
-
-            # Finds all cells with that possible number
-            num_cells = [cell for cell in sequence if num in cell.possibilities]
-
-            # If only one cell can have the number, set that cell to the number
-            if len(num_cells) == 1:
-                num_cells[0].value = num
-
-    def solve_last_possibility(self):
-        """Finds all cells that have only a single possible value left"""
-
-        for candidate_cell in self.cells:
-            # Skip cells with values
-            if candidate_cell.value:
-                continue
-
-            # If the cell has only one possibility left, set it to the last remaining value
-            if len(candidate_cell.possibilities) == 1:
-                candidate_cell.value = candidate_cell.possibilities[0]
-
     def solve_board(self):
         """Container method to solve the board"""
 
@@ -186,26 +188,21 @@ class Board(object):
             # Store the previous version of the board
             prev_board = self.__str__()
 
-            self.solve_last_possibility()
-
-            for x in range(0, 3):
-                for y in range(0, 3):
-                    self.solve_last_in_sequence(self.get_cells_where(supercell=(x, y)))
-
-            for i in range(LINE_LENGTH):
-                self.solve_last_in_sequence(self.get_cells_where(x=i))
-                self.solve_last_in_sequence(self.get_cells_where(y=i))
+            for cell in self.cells:
+                cell.solve()
 
             self.print_board()
 
             if self.__str__() == prev_board:
+                if "0" not in prev_board:
+                    print("Solved!")
+
                 break
 
 if __name__ == "__main__":
     board = Board()
 
-    print("Input boardstring:")
-    board.load_board(str(input()))
+    board.load_board(str(input("Input boardstring:")))
 
     board.print_board()
 
@@ -214,5 +211,3 @@ if __name__ == "__main__":
         board.set_neighbouring_cells(cell)
 
     board.solve_board()
-
-    board.print_board()
