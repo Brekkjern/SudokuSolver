@@ -88,14 +88,14 @@ class Board(object):
 
         while True:
             # Store the previous version of the board
-            prev_board = self.__str__()
+            prev_board = str(self)
 
             for cell in self.cells:
                 cell.solve()
 
             self.print_board()
 
-            if self.__str__() == prev_board:
+            if str(self) == prev_board:
                 if "0" not in prev_board:
                     print("Solved!")
 

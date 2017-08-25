@@ -63,13 +63,12 @@ class Cell(object):
         return [val for val in possibilities if val not in non_possibilities]
 
     def solve(self) -> Union[bool, None]:
-        if self.value:
-            return None
+        if not self.value:
+            ret_value = self.solve_last_possibility()
+            ret_value = ret_value if ret_value else self.solve_last_option()
+            return ret_value
 
-        ret_value = self.solve_last_possibility()
-        ret_value = ret_value if ret_value else self.solve_last_option()
-
-        return ret_value
+        return None
 
     def solve_last_possibility(self) -> bool:
         """Checks if there is only one possibility left for the cell"""
