@@ -29,16 +29,13 @@ class Board(object):
         200070038000006070300040600008020700100000006007030400004080009060400000910060002
         002980500400070013039604070200056400840300201907001086600705130091400005020030608
         """
-        i = 0
 
-        for char in boardstring:
+        for index, char in enumerate(boardstring):
             char = int(char)
-            x = i % LINE_LENGTH
-            y = math.floor(i / LINE_LENGTH)
+            x = index % LINE_LENGTH
+            y = math.floor(index / LINE_LENGTH)
 
             self.cells.append(Cell(x, y, char))
-
-            i += 1
 
         print("Loaded board:")
 
