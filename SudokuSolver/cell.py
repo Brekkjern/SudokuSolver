@@ -1,6 +1,7 @@
 import math
 from typing import Union
 
+
 class Cell(object):
     """
     The cell object.
@@ -10,11 +11,11 @@ class Cell(object):
     value is the current value of the cell, or None if there is no value set.
     possibilities is a list of current possible numbers for the cell
     """
-    def __init__(self, x, y, value=None):
-        self.x = x
-        self.y = y
+    def __init__(self, board, x, y, value=None):
+        self.x, self.y = x, y
         self.neighbours = None
         self._value = None
+        self.board = board
 
         if value == 0:
             self._value = None

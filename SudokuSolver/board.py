@@ -35,7 +35,7 @@ class Board(object):
             x = index % LINE_LENGTH
             y = math.floor(index / LINE_LENGTH)
 
-            self.cells.append(Cell(x, y, char))
+            self.cells.append(Cell(self, x, y, char))
 
         print("Loaded board:")
 
