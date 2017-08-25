@@ -83,13 +83,18 @@ class Cell(object):
     def solve_last_option(self) -> bool:
         """Checks if any of the neighbouring cells have any of the remaining possibilities"""
 
-        possibilities = self.possibilities.copy()
+        possibilities = set(self.possibilities.copy())
 
         for cell in self.neighbours:
-            possibilities += [val for val in possibilities if val not in cell.possibilities]
+            possibilities_for_neighbour = set([
+                val
+                for val in possibilities
+                if val not in cell.possibilities
+            ])
+            possibilities -= possibilities_for_neighbour
 
         if len(possibilities) == 1:
-            self.value = possibilities[0]
+            self.value = list(possibilities)[0]
             print("solve_last_option")
             return True
 
