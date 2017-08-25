@@ -46,20 +46,19 @@ class Cell(object):
     def supercell(self):
         """Gets the coordinate of the parent supercell"""
 
-        supercell_x = math.floor(self.x / SUPERCELL_SIZE)
-        supercell_y = math.floor(self.y / SUPERCELL_SIZE)
+        supercell_x = math.floor(self.x / self.board.SUPERCELL_SIZE)
+        supercell_y = math.floor(self.y / self.board.SUPERCELL_SIZE)
         return supercell_x, supercell_y
 
     @property
     def possibilities(self) -> list:
         """The current possible values for the cell"""
-        non_possibilities = list()
-
-        for cell in self.neighbours:
-            if cell.value:
-                non_possibilities.append(cell.value)
-
-        possibilities = list(range(1, LINE_LENGTH + 1))
+        non_possibilities = [
+            cell.value
+            for cell in self.neighbours
+            if cell.value
+        ]
+        possibilities = list(range(1, self.board.line_length + 1))
 
         return [val for val in possibilities if val not in non_possibilities]
 

@@ -1,11 +1,16 @@
+import math
+from SudokuSolver.cell import Cell
+
 class Board(object):
     """The board object. It does Sudoku things"""
 
-    def __init__(self, cells=None):
-        if cells:
-            self.cells = cells
-        else:
-            self.cells = list()
+    def __init__(self, boardstring, super_cell_size=3):
+        self.cells = list()
+        self.SUPERCELL_SIZE = super_cell_size
+        self.load_board(boardstring)
+
+        for cell in self.cells:
+            self.set_neighbouring_cells(cell)
 
     def __str__(self):
         """Returns a string representing the current board"""
@@ -22,6 +27,10 @@ class Board(object):
     def __iter__(self):
         return self.cells
 
+    @property
+    def line_length(self):
+        return self.SUPERCELL_SIZE ** 2
+
     def load_board(self, boardstring):
         """Loads a board from a string.
 
@@ -32,8 +41,8 @@ class Board(object):
 
         for index, char in enumerate(boardstring):
             char = int(char)
-            x = index % LINE_LENGTH
-            y = math.floor(index / LINE_LENGTH)
+            x = index % self.line_length
+            y = math.floor(index / self.line_length)
 
             self.cells.append(Cell(self, x, y, char))
 
@@ -46,9 +55,9 @@ class Board(object):
         print_line = ""
 
         # Split the line into
-        for i in range(LINE_LENGTH):
+        for i in range(self.line_length):
 
-            print_line += line[i*LINE_LENGTH:(i+1)*LINE_LENGTH] + "\n"
+            print_line += line[i*self.line_length:(i+1)*self.line_length] + "\n"
 
         # Print an extra line to separate previous prints
         print(print_line + "\n")
