@@ -87,7 +87,7 @@ class Cell(object):
         possibilities = self.possibilities.copy()
 
         for cell in self.neighbours:
-            possibilities = [val for val in possibilities if val not in cell.possibilities]
+            possibilities += [val for val in possibilities if val not in cell.possibilities]
 
         if len(possibilities) == 1:
             self.value = possibilities[0]
