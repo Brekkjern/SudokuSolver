@@ -31,6 +31,13 @@ class Board(object):
     def line_length(self):
         return self.SUPERCELL_SIZE ** 2
 
+    def get_possible_cell_values(self) -> list:
+        """Gets a list of the possible values for cells in the board
+
+        In a standard Sudoku board, this will be the integers 1 through 9
+        """
+        return list(range(1, self.line_length + 1))
+
     def load_board(self, boardstring):
         """Loads a board from a string.
 

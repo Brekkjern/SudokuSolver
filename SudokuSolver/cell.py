@@ -66,7 +66,7 @@ class Cell(object):
             if cell.value
         ]
 
-        return [val for val in self.board.get_possible_values() if val not in non_possibilities]
+        return [val for val in self.board.get_possible_cell_values() if val not in non_possibilities]
 
     def solve(self) -> Union[bool, None]:
         if not self.value:
