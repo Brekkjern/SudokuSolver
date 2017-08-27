@@ -65,9 +65,8 @@ class Cell(object):
             for cell in self.neighbours
             if cell.value
         ]
-        possibilities = list(range(1, self.board.line_length + 1))
 
-        return [val for val in possibilities if val not in non_possibilities]
+        return [val for val in self.board.get_possible_values() if val not in non_possibilities]
 
     def solve(self) -> Union[bool, None]:
         if not self.value:
