@@ -74,11 +74,7 @@ class Board(object):
     def set_neighbouring_cells(self, cell):
         """Finds all cells impacting the input cells and stores them in the cells list"""
 
-        vertical_cells = self.get_cells_where(x=cell.x)
-        horizontal_cells = self.get_cells_where(y=cell.y)
-        supercell_cells = self.get_cells_where(supercell=cell.supercell)
-
-        cell.neighbours = horizontal_cells + vertical_cells + supercell_cells
+        cell.neighbours = self.get_cells_where(supercell=cell.supercell, y=cell.y, x=cell.x)
 
         while cell in cell.neighbours:
             cell.neighbours.remove(cell)
