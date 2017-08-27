@@ -28,6 +28,13 @@ class Cell(object):
     def __repr__(self):
         return "Cell({x}, {y}, {value})".format(x=self.x, y=self.y, value=self.value)
 
+    def __add__(self, other):
+        """Allows for adding the values of cells together"""
+        try:
+            return self.value + other.value
+        except AttributeError:
+            return self.value + other
+
     @property
     def value(self):
         return self._value
