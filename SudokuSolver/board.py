@@ -38,13 +38,15 @@ class Board(object):
         """
         return list(range(1, self.line_length + 1))
 
-    def load_board(self, boardstring):
+    def load_board(self, boardstring: str):
         """Loads a board from a string.
 
         Example board strings:
         200070038000006070300040600008020700100000006007030400004080009060400000910060002
         002980500400070013039604070200056400840300201907001086600705130091400005020030608
         """
+
+        boardstring = str(boardstring)
 
         for index, char in enumerate(boardstring):
             char = int(char)
